@@ -1,0 +1,13 @@
+# Python 가상환경 폴더
+venv/
+__pycache__/
+
+# Flask 개발 서버 로그 파일
+*.log
+
+# IDE 및 편집기 설정 파일
+.idea/
+.vscode/
+
+# 기타
+*.sqlite
