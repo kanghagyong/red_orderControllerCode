@@ -162,7 +162,8 @@ def download3(filename):
 
 def uploadfile_option_check(df_item_config):
     itemList_stationery = ['GSSBMTL', 'GSSBACM', 'GSSBSTP']
-    itemList_koieditor = ['PHSTPAN']
+    itemList_koieditor = ['PHSTPAN', 'ACNTHAP', 'BNSTDGN', 'GSGLPAN']
+    itemList_ttibu = ['STTBDFT']
     totalList = len(df_item_config)
     nowtime = str(now.year) + '' + str(now.month) + '' + str(now.day) + '_' + str(now.hour) + '' + str(
         now.minute) + '' + str(now.second) + '' + str(now.microsecond)
@@ -198,13 +199,18 @@ def uploadfile_option_check(df_item_config):
                     time.sleep(0.2)
                 else:
                     papers.append(pwdata)
+            urlLink = 'https://www.redprinting.co.kr/ko/product/item/AC/ACNTHAP/detail/'
+            if itemCode == 'BNSTDGN':
+                urlLink = 'https://www.redprinting.co.kr/ko/product/item/BN/BNSTDGN/detail/'
+            if itemCode == 'GSGLPAN':
+                urlLink = 'https://www.redprinting.co.kr/ko/product/item/GS/GSGLPAN/detail/'
 
             i = 0
             for p in papers:
                 for r in resourceslist:
                     for ap1 in afterpcs01_list:
                         df_item.loc[i, 'ItemCode'] = itemCode
-                        df_item.loc[i, 'UrlLink'] = "https://www.redprinting.co.kr/ko/product/item/PH/PHSTPAN/detail/"+r
+                        df_item.loc[i, 'UrlLink'] = urlLink+""+r
                         df_item.loc[i, 'Papers'] = p[0]
                         df_item.loc[i, 'WgtCod'] = p[1]
                         df_item.loc[i, 'Amount'] = 1
@@ -229,6 +235,62 @@ def uploadfile_option_check(df_item_config):
             ws['D2'] = 'x'
 
             wb.save(new_filename)
+        elif itemCode in itemList_ttibu:
+            sampleOption_filename = LIST_FOLDER+'/ttibu_option_sample.xlsx'
+            df_item = pd.read_excel(sampleOption_filename, sheet_name=0, engine='openpyxl', skiprows=1)
+            if "," in df_item_config.iloc[item, 1]:
+                papers_wgtlist = df_item_config.iloc[item, 1].split(",")
+            else:
+                papers_wgtlist = []
+                papers_wgtlist.append(df_item_config.iloc[item, 1])
+            if "," in df_item_config.iloc[item, 2]:
+                resourceslist = df_item_config.iloc[item, 2].split(",")
+            else:
+                resourceslist = []
+                resourceslist.append(df_item_config.iloc[item, 2])
+            if df_item_config.iloc[item, 3] == 'x':
+                afterpcs01_list = ['x']
+            else:
+                afterpcs01_list = df_item_config.iloc[item, 3].split(",")
+
+            papers = []  # 용지리스트
+            for pw in papers_wgtlist:
+                pwdata = pw.split("_")
+                if pwdata[0] in papers:
+                    time.sleep(0.2)
+                else:
+                    papers.append(pwdata)
+
+            i = 0
+            for p in papers:
+                for r in resourceslist:
+                    for ap1 in afterpcs01_list:
+                        df_item.loc[i, 'ItemCode'] = itemCode
+                        df_item.loc[i, 'Papers'] = p[0]
+                        df_item.loc[i, 'Sizes'] = r
+                        df_item.loc[i, 'Amount'] = 1
+                        df_item.loc[i, 'AfterPcs01'] = ap1
+                        df_item.loc[i, 'OrderCode'] = ""
+                        df_item.loc[i, 'Price'] = ""
+                        i = i + 1
+
+            # print(i)
+            new_filename = DATA_FOLDER+'/' + itemCode + '_' + nowtime + '.xlsx'
+            df_item.to_excel(new_filename, sheet_name=itemCode, index=False, startrow=7)
+            wb = load_workbook(new_filename)
+            ws = wb.active
+            ws['A1'] = 'UrlLink'
+            ws['B1'] = 'ItemCode'
+            ws['C1'] = 'ID'
+            ws['D1'] = 'PW'
+
+            ws['A2'] = 'https://www.redprinting.co.kr/ko/product/item/'+itemCode[:2]+'/'+itemCode
+            ws['B2'] = itemCode
+            ws['C2'] = 'x'
+            ws['D2'] = 'x'
+
+            wb.save(new_filename)
+
         else:
             sampleOption_filename = LIST_FOLDER+'/option_sample.xlsx'
             df_item = pd.read_excel(sampleOption_filename, sheet_name=0, engine='openpyxl', skiprows=1)
@@ -359,9 +421,10 @@ def login_check_proc(userid, userpw, itemUrl, driver):
     driver.execute_script('window.scrollTo(0, 200)')
 
 def uploadfile_ordernum_creating(df_item_config, df_item):
-    itemList_card = ['BCSPDFT', 'BNSTDFT']
+    itemList_card = ['BCSPDFT', 'BNSTDFT', 'PRCAFIL']
     itemList_sticker = ['STCUXXX', 'STTHCIC', 'STTHELP', 'STTHSQU']
     itemList_stationery = ['GSSBMTL', 'GSSBACM', 'GSSBSTP']
+    itemList_ttiBu = ['STTBDFT']
     options = ChromeOptions()
     options.add_argument('--blink-settings=imagesEnabled=false')
     driver = webdriver.Chrome(options=options)
@@ -374,9 +437,9 @@ def uploadfile_ordernum_creating(df_item_config, df_item):
     userid = df_item_config.iloc[0,2]
     userpw = df_item_config.iloc[0,3]
     if userid == "x":
-        userid = 'redprinting'
+        userid = 'redprinting' #red_openmarket, #redprinting
     if userpw == "x":
-        userpw = 'redprinting#1234'
+        userpw = 'redprinting#1234' #red4874# , #redprinting#1234
     login_check_proc(userid, userpw, itemUrl, driver)
     newFileData = "아이템코드\t용지\t용지무게\t인쇄도수\t가로\t세로\t사이즈\t수량\t코팅후가공\t타공후가공\t귀돌이후가공\t재단후가공\t아일렛후가공\t주문관리코드\t금액\n"
     try:
@@ -427,33 +490,36 @@ def uploadfile_ordernum_creating(df_item_config, df_item):
                         WebDriverWait(driver, 10).until( EC.invisibility_of_element_located((By.ID, 'overlay')) )
                         driver.find_element(By.LINK_TEXT, dosu).click()
                 time.sleep(0.5)
-                if driver.find_element(By.ID, 'sizeSelectBoxItText').text != '사이즈직접입력':
-                    # 사이즈 직접입력 선택 sizeSelectBoxItContainer
-                    driver.find_element(By.ID, 'sizeSelectBoxIt').click()
-                    time.sleep(1)
-                    driver.find_element(By.LINK_TEXT, '사이즈직접입력').click()
-                time.sleep(0.5)
-                if driver.find_element(By.ID, 'CUT_WDT').get_attribute('value') != wid_size:
-                    # 상품 페이지 사이즈 직접입력 사이즈 입력
-                    driver.find_element(By.ID, 'CUT_WDT').click()
+                if itemCode == 'PRCAFIL':
+                    time.sleep(0.2)
+                else:
+                    if driver.find_element(By.ID, 'sizeSelectBoxItText').text != '사이즈직접입력':
+                        # 사이즈 직접입력 선택 sizeSelectBoxItContainer
+                        driver.find_element(By.ID, 'sizeSelectBoxIt').click()
+                        time.sleep(1)
+                        driver.find_element(By.LINK_TEXT, '사이즈직접입력').click()
                     time.sleep(0.5)
-                    driver.find_element(By.ID, 'CUT_WDT').send_keys(Keys.BACK_SPACE)
-                    driver.find_element(By.ID, 'CUT_WDT').send_keys(Keys.BACK_SPACE)
-                    driver.find_element(By.ID, 'CUT_WDT').send_keys(Keys.BACK_SPACE)
-                    driver.find_element(By.ID, 'CUT_WDT').send_keys(Keys.BACK_SPACE)
+                    if driver.find_element(By.ID, 'CUT_WDT').get_attribute('value') != wid_size:
+                        # 상품 페이지 사이즈 직접입력 사이즈 입력
+                        driver.find_element(By.ID, 'CUT_WDT').click()
+                        time.sleep(0.5)
+                        driver.find_element(By.ID, 'CUT_WDT').send_keys(Keys.BACK_SPACE)
+                        driver.find_element(By.ID, 'CUT_WDT').send_keys(Keys.BACK_SPACE)
+                        driver.find_element(By.ID, 'CUT_WDT').send_keys(Keys.BACK_SPACE)
+                        driver.find_element(By.ID, 'CUT_WDT').send_keys(Keys.BACK_SPACE)
+                        time.sleep(0.5)
+                        driver.find_element(By.ID, 'CUT_WDT').send_keys(wid_size)
                     time.sleep(0.5)
-                    driver.find_element(By.ID, 'CUT_WDT').send_keys(wid_size)
-                time.sleep(0.5)
-                if driver.find_element(By.ID, 'CUT_HGH').get_attribute('value') != hei_size:
-                    driver.find_element(By.ID, 'CUT_HGH').click()
+                    if driver.find_element(By.ID, 'CUT_HGH').get_attribute('value') != hei_size:
+                        driver.find_element(By.ID, 'CUT_HGH').click()
+                        time.sleep(0.5)
+                        driver.find_element(By.ID, 'CUT_HGH').send_keys(Keys.BACK_SPACE)
+                        driver.find_element(By.ID, 'CUT_HGH').send_keys(Keys.BACK_SPACE)
+                        driver.find_element(By.ID, 'CUT_HGH').send_keys(Keys.BACK_SPACE)
+                        driver.find_element(By.ID, 'CUT_HGH').send_keys(Keys.BACK_SPACE)
+                        time.sleep(0.5)
+                        driver.find_element(By.ID, 'CUT_HGH').send_keys(hei_size)
                     time.sleep(0.5)
-                    driver.find_element(By.ID, 'CUT_HGH').send_keys(Keys.BACK_SPACE)
-                    driver.find_element(By.ID, 'CUT_HGH').send_keys(Keys.BACK_SPACE)
-                    driver.find_element(By.ID, 'CUT_HGH').send_keys(Keys.BACK_SPACE)
-                    driver.find_element(By.ID, 'CUT_HGH').send_keys(Keys.BACK_SPACE)
-                    time.sleep(0.5)
-                    driver.find_element(By.ID, 'CUT_HGH').send_keys(hei_size)
-                time.sleep(0.5)
                 driver.find_element(By.ID, 'WRK_HGH').click()
                 time.sleep(0.5)
                 if amount != "":
@@ -475,7 +541,11 @@ def uploadfile_ordernum_creating(df_item_config, df_item):
                     WebDriverWait(driver, 10).until( EC.invisibility_of_element_located((By.ID, 'overlay')) )
 
                 time.sleep(0.5)
-                apcs_nowstatus = driver.find_element(By.ID, 'opt_string').get_attribute('value')
+                if itemCode == 'PRCAFIL':
+                    apcs_nowstatus = driver.find_element(By.ID, 'priceCalcResult').get_attribute(
+                        'value')  # priceCalcResult, opt_string
+                else:
+                    apcs_nowstatus = driver.find_element(By.ID, 'opt_string').get_attribute('value')
                 if apcs1 == "무광":
                     if 'COT_DFT' in apcs_nowstatus:
                         time.sleep(0.2)
@@ -571,21 +641,21 @@ def uploadfile_ordernum_creating(df_item_config, df_item):
                 # time.sleep(1)
                 # driver.find_element(By.CSS_SELECTOR, 'body > div.page_order > div > aside > div.search_tool.search_tool_update > div.confirmbox-wrap > div.radio-group-big > span.radio-group-inner > label').click()
                 # time.sleep(0.5)
-                driver.execute_script('window.scrollTo(0, 300)')
+                driver.execute_script('window.scrollTo(0, 500)')
                 time.sleep(0.5)
                 total_price = driver.find_element(By.ID, 'TOTAL_PRICE').text
                 # df_item.loc[i, 'Price'] = total_price
-                # print(i, "번째 TOTAL_PRICE : ", total_price)
-                print(df_item)
-                time.sleep(0.5)
-                driver.find_element(By.ID, 'direct_order_btn').click()
-                time.sleep(1)
+                print(i, "번째 TOTAL_PRICE : ", total_price)
+                # print(df_item)
+                driver.execute_script("productOrder.order_validate('pot_create');")
+                # driver.find_element(By.ID, 'direct_order_btn').click()
+                WebDriverWait(driver, 10).until(EC.alert_is_present())
                 al = Alert(driver)
                 al.accept()
                 time.sleep(0.5)
                 imsiordernum = driver.find_element(By.ID, 'pot_tmp_cod').get_attribute('value')
                 # df_item.loc[i, 'OrderCode'] = imsiordernum #주문관리코드생성후추가
-                # print(i, "번째 TOTAL_PRICE : ", total_price, "pot_tmp_cod : ", imsiordernum)
+                print(i, "번째 TOTAL_PRICE : ", total_price, "pot_tmp_cod : ", imsiordernum)
                 newFileData = newFileData+"\t"+imsiordernum+"\t"+total_price+"\n"
                 if (i+1) % 5 == 0:
                     nowtime = str(now.year)+''+str(now.month)+''+str(now.day)+'_'+str(now.hour)+''+str(now.minute)
@@ -593,7 +663,7 @@ def uploadfile_ordernum_creating(df_item_config, df_item):
                     with open(new_filename, 'w', encoding='ansi') as file:
                         file.write(newFileData)
 
-                driver.execute_script('window.location.reload();')
+                # driver.execute_script('window.location.reload();')
                 driver.execute_script('window.scrollTo(0, 100);')
                 time.sleep(5)
 
@@ -749,6 +819,20 @@ def uploadfile_ordernum_creating(df_item_config, df_item):
                 # df_item.loc[i, 'OrderCode'] = imsiordernum  # 주문관리코드생성후추가
                 # print(i, "번째 TOTAL_PRICE : ", tprice, "pot_tmp_cod : ", imsiordernum)
                 time.sleep(1)
+        elif itemCode in itemList_ttiBu:
+            for i in range(totalList):
+                newFileData = fileCreating_ttibu_fn(newFileData, itemCode, df_item, driver, i)
+
+                if (i+1) % 5 == 0:
+                    nowtime = str(now.year)+''+str(now.month)+''+str(now.day)+'_'+str(now.hour)+''+str(now.minute)
+                    new_filename = REDATA_FOLDER+'/'+userid+'_'+itemCode+"_"+str(i+1)+'_'+nowtime+'.txt'
+                    with open(new_filename, 'w', encoding='ansi') as file:
+                        file.write(newFileData)
+
+                # driver.execute_script('window.location.reload();')
+                driver.execute_script('window.scrollTo(0, 100);')
+                time.sleep(5)
+
         else:
             print('error')
 
@@ -764,6 +848,73 @@ def uploadfile_ordernum_creating(df_item_config, df_item):
         driver.quit()
     finally:
         driver.quit()
+
+def fileCreating_ttibu_fn(newFileData, itemCode, df_item, driver, i):
+    paper = df_item.iloc[i, 1]
+    size = df_item.iloc[i, 2]
+    amount = df_item.iloc[i, 3]
+    apcs1 = df_item.iloc[i, 4]
+    newFileData = newFileData + itemCode + "\t" + str(paper) + "\t" + "\t" + str(size) + "\t" + str(
+        amount) + "\t" + str(apcs1) + "\t"
+
+    driver.execute_script('window.scrollTo(0, 100)')
+    time.sleep(0.5)
+    paper_text = WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.ID, "paperSelectBoxItText")))
+    if paper_text.text != paper:
+        # 상품 페이지 용지선택
+        time.sleep(0.5)
+        # paperSelectBoxItContainer
+        driver.find_element(By.ID, 'paperSelectBoxIt').click()
+        time.sleep(0.5)
+        driver.find_element(By.LINK_TEXT, paper).click()
+    time.sleep(0.5)
+
+    if size != 'x':
+        driver.find_element(By.ID, 'sizeSelectBoxIt').click()
+        time.sleep(1)
+        driver.find_element(By.LINK_TEXT, size).click()
+    time.sleep(0.5)
+
+    driver.execute_script("productOrder.order_type_change('editor');")
+
+    time.sleep(0.5)
+    apcs_nowstatus = driver.find_element(By.ID, 'priceCalcResult').get_attribute(
+        'value')  # priceCalcResult, opt_string
+    if apcs1 == "x":
+        time.sleep(0.2)
+    elif apcs1 == "개별포장":
+        if 'PAK_ETC' in apcs_nowstatus:
+            time.sleep(0.2)
+        else:
+            # 상품 페이지 코팅 선택
+            driver.execute_script(" productOrder.opt_use_yn('PAK_ETC', 'SID_X'); ")
+        time.sleep(0.5)
+
+    # time.sleep(1)
+    # driver.find_element(By.CSS_SELECTOR, 'body > div.page_order > div > aside > div.search_tool.search_tool_update > div.confirmbox-wrap > div.radio-group-big > span.radio-group-inner > label').click()
+    # time.sleep(0.5)
+    driver.execute_script('window.scrollTo(0, 500)')
+    time.sleep(0.5)
+    # driver.execute_script("productOrder.order_type_change('editor');")
+    # time.sleep(5)
+    total_price = driver.find_element(By.ID, 'TOTAL_PRICE').text
+    # df_item.loc[i, 'Price'] = total_price
+    print(i, "번째 TOTAL_PRICE : ", total_price)
+    # print(df_item)
+    driver.execute_script("productOrder.order_validate('pot_create');")
+    time.sleep(7)
+    driver.execute_script("productOrder.order_validate('pot_create');")
+    # driver.find_element(By.ID, 'direct_order_btn').click()
+    WebDriverWait(driver, 10).until(EC.alert_is_present())
+    al = Alert(driver)
+    al.accept()
+    time.sleep(0.5)
+    imsiordernum = driver.find_element(By.ID, 'pot_tmp_cod').get_attribute('value')
+
+    # df_item.loc[i, 'OrderCode'] = imsiordernum #주문관리코드생성후추가
+    print(i, "번째 TOTAL_PRICE : ", total_price, "pot_tmp_cod : ", imsiordernum)
+    newFileData = newFileData + "\t" + imsiordernum + "\t" + total_price + "\n"
+    return newFileData
 
 def uploadfile_ordernum_creating_pan(df_item_config, df_item):
     try:
@@ -795,73 +946,87 @@ def uploadfile_ordernum_creating_pan(df_item_config, df_item):
                 time.sleep(3)
                 driver.get(itemUrl)
 
-            newFileData = newFileData + itemCode + "\t" + str(itemUrl) + "\t" + str(paper) + "\t" + str(wgtcod) + "\t" + str(amount) + "\t" + str(apcs1) + "\t"
+            # newFileData = newFileData + itemCode + "\t" + str(itemUrl) + "\t" + str(paper) + "\t" + str(wgtcod) + "\t" + str(amount) + "\t" + str(apcs1) + "\t"
             time.sleep(2)
-            paper_text = WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.ID, "paperSelectBoxItText")))
-            if paper_text.text != paper:
-                # 상품 페이지 용지선택
-                WebDriverWait(driver, 10).until(EC.invisibility_of_element_located((By.ID, 'overlay')))
-                # paperSelectBoxItContainer
-                driver.find_element(By.ID, 'paperSelectBoxIt').click()
-                WebDriverWait(driver, 10).until(EC.invisibility_of_element_located((By.ID, 'overlay')))
-                driver.find_element(By.LINK_TEXT, paper).click()
+            # paper_text = WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.ID, "paperSelectBoxItText")))
+            # if paper_text.text != paper:
+            #     # 상품 페이지 용지선택
+            #     WebDriverWait(driver, 10).until(EC.invisibility_of_element_located((By.ID, 'overlay')))
+            #     # paperSelectBoxItContainer
+            #     driver.find_element(By.ID, 'paperSelectBoxIt').click()
+            #     WebDriverWait(driver, 10).until(EC.invisibility_of_element_located((By.ID, 'overlay')))
+            #     driver.find_element(By.LINK_TEXT, paper).click()
+            #
+            # WebDriverWait(driver, 10).until(EC.invisibility_of_element_located((By.ID, 'overlay')))
+            # if wgtcod != "":
+            #     # 상품 페이지 G수 선택
+            #     wgt_text = WebDriverWait(driver, 5).until(
+            #         EC.visibility_of_element_located((By.ID, "paper_sub_selectSelectBoxItText")))
+            #     if wgt_text.text != str(wgtcod):
+            #         # paper_sub_selectSelectBoxItContainer
+            #         driver.find_element(By.ID, 'paper_sub_selectSelectBoxIt').click()
+            #         WebDriverWait(driver, 10).until(EC.invisibility_of_element_located((By.ID, 'overlay')))
+            #         driver.find_element(By.LINK_TEXT, str(wgtcod)).click()
+            #
+            # WebDriverWait(driver, 10).until(EC.invisibility_of_element_located((By.ID, 'overlay')))
 
-            WebDriverWait(driver, 10).until(EC.invisibility_of_element_located((By.ID, 'overlay')))
-            if wgtcod != "":
-                # 상품 페이지 G수 선택
-                wgt_text = WebDriverWait(driver, 5).until(
-                    EC.visibility_of_element_located((By.ID, "paper_sub_selectSelectBoxItText")))
-                if wgt_text.text != str(wgtcod):
-                    # paper_sub_selectSelectBoxItContainer
-                    driver.find_element(By.ID, 'paper_sub_selectSelectBoxIt').click()
-                    WebDriverWait(driver, 10).until(EC.invisibility_of_element_located((By.ID, 'overlay')))
-                    driver.find_element(By.LINK_TEXT, str(wgtcod)).click()
+            # driver.execute_script("productOrder.check_PRN_CNT();")
+            # number1_text = WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.ID, "number1")))
+            # if number1_text.get_attribute('value') != str(amount):
+            #     time.sleep(0.5)
+            #     driver.find_element(By.ID, 'number1').click()
+            #     driver.find_element(By.ID, 'number1').send_keys(Keys.DELETE)
+            #     driver.find_element(By.ID, 'number1').send_keys(Keys.DELETE)
+            #     driver.find_element(By.ID, 'number1').send_keys(Keys.DELETE)
+            #     driver.find_element(By.ID, 'number1').send_keys(Keys.DELETE)
+            #     driver.find_element(By.ID, 'number1').send_keys(Keys.BACK_SPACE)
+            #     driver.find_element(By.ID, 'number1').send_keys(Keys.BACK_SPACE)
+            #     driver.find_element(By.ID, 'number1').send_keys(Keys.BACK_SPACE)
+            #     driver.find_element(By.ID, 'number1').send_keys(Keys.BACK_SPACE)
+            #     time.sleep(0.5)
+            #     driver.find_element(By.ID, 'number1').send_keys(str(amount))
 
-            WebDriverWait(driver, 10).until(EC.invisibility_of_element_located((By.ID, 'overlay')))
-
-            driver.execute_script("productOrder.check_PRN_CNT();")
-            number1_text = WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.ID, "number1")))
-            if number1_text.get_attribute('value') != str(amount):
+            # WebDriverWait(driver, 10).until(EC.invisibility_of_element_located((By.ID, 'overlay')))
+            # apcs_nowstatus = driver.find_element(By.ID, 'priceCalcResult').get_attribute('value')
+            if apcs1 == "x":
                 time.sleep(0.5)
-                driver.find_element(By.ID, 'number1').click()
-                driver.find_element(By.ID, 'number1').send_keys(Keys.DELETE)
-                driver.find_element(By.ID, 'number1').send_keys(Keys.DELETE)
-                driver.find_element(By.ID, 'number1').send_keys(Keys.DELETE)
-                driver.find_element(By.ID, 'number1').send_keys(Keys.DELETE)
-                driver.find_element(By.ID, 'number1').send_keys(Keys.BACK_SPACE)
-                driver.find_element(By.ID, 'number1').send_keys(Keys.BACK_SPACE)
-                driver.find_element(By.ID, 'number1').send_keys(Keys.BACK_SPACE)
-                driver.find_element(By.ID, 'number1').send_keys(Keys.BACK_SPACE)
-                time.sleep(0.5)
-                driver.find_element(By.ID, 'number1').send_keys(str(amount))
-
-            WebDriverWait(driver, 10).until(EC.invisibility_of_element_located((By.ID, 'overlay')))
-            apcs_nowstatus = driver.find_element(By.ID, 'priceCalcResult').get_attribute('value')
-            if apcs1 == "무광":
-                if 'COT_DFT' in apcs_nowstatus:
-                    time.sleep(0.2)
-                else:
-                    # 상품 페이지 코팅 선택
-                    driver.execute_script("productOrder.opt_use_yn('COT_DFT', 'SID_S');")
-                WebDriverWait(driver, 10).until(EC.invisibility_of_element_located((By.ID, 'overlay')))
-                driver.execute_script("productOrder.opt_select('COT_DFT','MA');")  # 상품 페이지 무광코팅 선택
-            elif apcs1 == "유광":
-                if 'COT_DFT' in apcs_nowstatus:
-                    time.sleep(0.2)
-                else:
-                    # 상품 페이지 코팅 선택
-                    driver.execute_script("productOrder.opt_use_yn('COT_DFT', 'SID_S');")
-                WebDriverWait(driver, 10).until(EC.invisibility_of_element_located((By.ID, 'overlay')))
-                driver.execute_script("productOrder.opt_select('COT_DFT','GL');")  # 상품 페이지 유광코팅 선택
             else:
-                if 'COT_DFT' in apcs_nowstatus:
-                    driver.execute_script("productOrder.opt_use_yn('COT_DFT', 'SID_S');")  # 코팅 후가공 다시 선택 시 선택해제됨.
-                else:
-                    time.sleep(0.2)
+                if apcs1 == "NBMGN":
+                    driver.execute_script("productOrder.opt_checked('WRK_MTR', 'NBMGN');")  # 마그넷
+                elif apcs1 == "NBPIN":
+                    driver.execute_script("productOrder.opt_checked('WRK_MTR', 'NBPIN');")  # 옷핀 집게
+                elif apcs1 == "무광":
+                    driver.execute_script("productOrder.opt_select('COT_DFT','MA');")  # 상품 페이지 무광코팅 선택
+                elif apcs1 == "유광":
+                    driver.execute_script("productOrder.opt_select('COT_DFT','GL');")  # 상품 페이지 유광코팅 선택
 
+            #     if 'COT_DFT' in apcs_nowstatus:
+            #         time.sleep(0.2)
+            #     else:
+            #         # 상품 페이지 코팅 선택
+            #         driver.execute_script("productOrder.opt_use_yn('COT_DFT', 'SID_S');")
+            #     WebDriverWait(driver, 10).until(EC.invisibility_of_element_located((By.ID, 'overlay')))
+            #     driver.execute_script("productOrder.opt_select('COT_DFT','MA');")  # 상품 페이지 무광코팅 선택
+            # elif apcs1 == "유광":
+            #     if 'COT_DFT' in apcs_nowstatus:
+            #         time.sleep(0.2)
+            #     else:
+            #         # 상품 페이지 코팅 선택
+            #         driver.execute_script("productOrder.opt_use_yn('COT_DFT', 'SID_S');")
+            #     WebDriverWait(driver, 10).until(EC.invisibility_of_element_located((By.ID, 'overlay')))
+            #     driver.execute_script("productOrder.opt_select('COT_DFT','GL');")  # 상품 페이지 유광코팅 선택
+            # else:
+            #     if 'COT_DFT' in apcs_nowstatus:
+            #         driver.execute_script("productOrder.opt_use_yn('COT_DFT', 'SID_S');")  # 코팅 후가공 다시 선택 시 선택해제됨.
+            #     else:
+            #         time.sleep(0.2)
+            #
+            # time.sleep(0.5)
+            driver.execute_script('window.scrollTo(0, 500)')
             time.sleep(0.5)
-            driver.execute_script('window.scrollTo(0, 300)')
-            time.sleep(0.5)
+            if itemCode == 'GSGLPAN':
+                checkbox = driver.find_element(By.XPATH, '//*[@id="chk_notice_confirm"]')
+                driver.execute_script("arguments[0].checked = true;", checkbox)
 
             WebDriverWait(driver, 5).until(EC.invisibility_of_element_located((By.ID, 'overlay')))
             time.sleep(0.5)
@@ -874,21 +1039,21 @@ def uploadfile_ordernum_creating_pan(df_item_config, df_item):
             al.accept()
             time.sleep(0.5)
             imsiordernum = driver.find_element(By.ID, 'pot_tmp_cod').get_attribute('value')
-            newFileData = newFileData + "\t" + imsiordernum + "\t" + tprice + "\n"
-            if (i + 1) % 5 == 0:
-                nowtime = str(now.year) + '' + str(now.month) + '' + str(now.day) + '_' + str(now.hour) + '' + str(
-                    now.minute)
-                new_filename = REDATA_FOLDER + '/' + userid + '_' + itemCode + "_" + str(i + 1) + '_' + nowtime + '.txt'
-                print(new_filename)
-                with open(new_filename, 'w', encoding='ansi') as file:
-                    file.write(newFileData)
-            df_item.loc[i, 'OrderCode'] = imsiordernum  # 주문관리코드생성후추가
+            # newFileData = newFileData + "\t" + imsiordernum + "\t" + tprice + "\n"
+            # if (i + 1) % 5 == 0:
+            #     nowtime = str(now.year) + '' + str(now.month) + '' + str(now.day) + '_' + str(now.hour) + '' + str(
+            #         now.minute)
+            #     new_filename = REDATA_FOLDER + '/' + userid + '_' + itemCode + "_" + str(i + 1) + '_' + nowtime + '.txt'
+            #     print(new_filename)
+            #     with open(new_filename, 'w', encoding='ansi') as file:
+            #         file.write(newFileData)
+            # df_item.loc[i, 'OrderCode'] = imsiordernum  # 주문관리코드생성후추가
             print(i, "번째 TOTAL_PRICE : ", tprice, "pot_tmp_cod : ", imsiordernum)
 
-        nowtime=str(now.year)+''+str(now.month)+''+str(now.day)+''+str(now.hour)+''+str(now.minute)
-        new_filename = REDATA_FOLDER+'/'+userid+'_'+itemCode+'_' + nowtime + '.txt'
-        with open(new_filename, 'w', encoding='ansi') as file:
-            file.write(newFileData)
+        # nowtime=str(now.year)+''+str(now.month)+''+str(now.day)+''+str(now.hour)+''+str(now.minute)
+        # new_filename = REDATA_FOLDER+'/'+userid+'_'+itemCode+'_' + nowtime + '.txt'
+        # with open(new_filename, 'w', encoding='ansi') as file:
+        #     file.write(newFileData)
         # df_item.to_excel(new_filename, sheet_name=itemCode, index=False)
         time.sleep(5)
         driver.quit()
@@ -899,4 +1064,4 @@ def uploadfile_ordernum_creating_pan(df_item_config, df_item):
         print("finally")
         # driver.quit()
 if __name__ == '__main__':
-    app2.run(debug=True, host='0.0.0.0', port=5100)
+    app2.run(debug=True, host='0.0.0.0', port=5550)
