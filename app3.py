@@ -2105,6 +2105,8 @@ def uploadfile_ordernum_creating(df_item_config, df_item):
                 # total_price = wait.until( EC.visibility_of_element_located((By.ID, "PRICE_DIS2")) )
                 # tprice = total_price.text
                 time.sleep(1)
+                driver.execute_script("$('#chk_notice_confirm').click();")  # 확인했습니다.
+                time.sleep(1)
                 try:
                      driver.find_element(By.ID, 'direct_order_btn').click()
                      try:
@@ -2119,7 +2121,7 @@ def uploadfile_ordernum_creating(df_item_config, df_item):
                     print("예외 발생:", e)
                 # time.sleep(5)
                 # driver.find_element(By.ID, 'direct_order_btn').click()
-                time.sleep(2)
+                time.sleep(1)
                 print(i, "번째 : ", colum_1, "|", colum_2, "|", colum_3, "|", colum_4, "|", colum_5, "|", colum_6)  # , "pot_tmp_cod : ", imsiordernum
                 # al = Alert(driver)
                 # al.accept()
