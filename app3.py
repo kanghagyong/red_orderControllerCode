@@ -2085,16 +2085,25 @@ def uploadfile_ordernum_creating(df_item_config, df_item):
                     wait.until(EC.invisibility_of_element_located((By.ID, 'overlay')))
                     driver.find_element(By.LINK_TEXT, colum_3).click()
 
+                time.sleep(0.5)
                 if colum_4 == 'x':
                     time.sleep(0.5)
                 else:
-                    driver.execute_script("productOrder.check_GSPASGC('chain', '"+colum_4+"'); ")
+                    print("#"+colum_4+"_chain_CHK")
+                    driver.execute_script('$("#'+colum_4+'_chain_CHK").click();')
+                    time.sleep(0.5)
+                    driver.execute_script('$("#'+colum_4+'_chain_CHK").click();')
 
+                time.sleep(0.5)
                 if colum_5 == 'x':
                     time.sleep(0.5)
                 else:
-                    driver.execute_script(" productOrder.check_GSPASGC('thickness', '"+colum_5+"'); ")
+                    driver.execute_script('$("#'+colum_5+'_thickness_CHK").click();')
+                    time.sleep(0.5)
+                    driver.execute_script('$("#'+colum_5+'_thickness_CHK").click();')
+                    # driver.execute_script(" productOrder.check_GSPASGC('thickness', '"+colum_5+"'); ")
 
+                time.sleep(0.5)
                 if colum_6 == 'x':
                     time.sleep(0.5)
                 else:
@@ -2125,13 +2134,13 @@ def uploadfile_ordernum_creating(df_item_config, df_item):
                 print(i, "번째 : ", colum_1, "|", colum_2, "|", colum_3, "|", colum_4, "|", colum_5, "|", colum_6)  # , "pot_tmp_cod : ", imsiordernum
                 # al = Alert(driver)
                 # al.accept()
-                # time.sleep(0.5)
+                # time.sleep(1)
                 # imsiordernum = driver.find_element(By.ID, 'pot_tmp_cod').get_attribute('value')
                 # print(i, "번째 : ", colum_1, "|", colum_2, "|", colum_3, "|", colum_4, "|", colum_5, "|", colum_6, "|", colum_7) #, "pot_tmp_cod : ", imsiordernum
                 # print(i, "번째 TOTAL_PRICE : ", tprice)
                 driver.execute_script('window.location.reload();')
                 driver.execute_script('window.scrollTo(0, 100);')
-                time.sleep(2)
+                time.sleep(1)
         else:
             print('error')
 
