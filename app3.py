@@ -695,7 +695,8 @@ def uploadfile_ordernum_creating(df_item_config, df_item):
     itemList_note = ['GSNTMIS']
     itemList_calendar = ['PRCLSTD']
     itemList_poster = ['PRPORSO', 'PRPOWTT', 'PRPOXXX', 'PRPOXSP', 'PRPOXPO', 'PRPOWHT', 'WBXXXXX']
-    itemList_kring = ['GSSRCUT']
+    itemList_kring = ['GSSRCUT', 'GSSRPRT']
+    itemList_pendunte = ['GSPASGC']
 
     options = ChromeOptions()
     options.add_argument('--blink-settings=imagesEnabled=false')
@@ -942,7 +943,6 @@ def uploadfile_ordernum_creating(df_item_config, df_item):
                 driver.execute_script('window.location.reload();')
                 driver.execute_script('window.scrollTo(0, 100);')
                 time.sleep(1)
-
         elif itemCode in itemList_sticker:
             for i in range(totalList):
                 paper = df_item.iloc[i, 1]
@@ -2048,6 +2048,79 @@ def uploadfile_ordernum_creating(df_item_config, df_item):
                 time.sleep(2)
                 print(i, "번째 : ", colum_1, "|", colum_2, "|", colum_3, "|", colum_4, "|", colum_5, "|", colum_6, "|",
                       colum_7)  # , "pot_tmp_cod : ", imsiordernum
+                # al = Alert(driver)
+                # al.accept()
+                # time.sleep(0.5)
+                # imsiordernum = driver.find_element(By.ID, 'pot_tmp_cod').get_attribute('value')
+                # print(i, "번째 : ", colum_1, "|", colum_2, "|", colum_3, "|", colum_4, "|", colum_5, "|", colum_6, "|", colum_7) #, "pot_tmp_cod : ", imsiordernum
+                # print(i, "번째 TOTAL_PRICE : ", tprice)
+                driver.execute_script('window.location.reload();')
+                driver.execute_script('window.scrollTo(0, 100);')
+                time.sleep(2)
+        elif itemCode in itemList_pendunte:
+            wait = WebDriverWait(driver, 10)
+            for i in range(totalList):
+                time.sleep(2)
+                colum_1 = df_item.iloc[i, 1] #규격
+                colum_2 = df_item.iloc[i, 2] #사이즈
+                colum_3 = df_item.iloc[i, 3] #인쇄도수
+                colum_4 = df_item.iloc[i, 4] #목걸이
+                colum_5 = df_item.iloc[i, 5] #목걸이두께
+                colum_6 = df_item.iloc[i, 6] #개별포장여부
+
+                # driver.execute_script("arguments[0].style.display = 'block';", driver.find_element(By.ID, "paper_tr"))
+                driver.execute_script('window.scrollTo(0, 100);')
+                time.sleep(0.5)
+
+                driver.execute_script("productOrder.check_GSPASGC('shape_type', '"+colum_1+"');")
+
+                time.sleep(1)
+                size_select = wait.until( EC.visibility_of_element_located((By.ID, "pendant_size")) )
+                size = Select(size_select)
+                size.select_by_visible_text(colum_2)
+
+                docu_text = wait.until( EC.visibility_of_element_located((By.ID, "soduSelectBoxItText")))
+                if docu_text.text != colum_3:
+                    driver.find_element(By.ID, 'soduSelectBoxIt').click()
+                    wait.until(EC.invisibility_of_element_located((By.ID, 'overlay')))
+                    driver.find_element(By.LINK_TEXT, colum_3).click()
+
+                if colum_4 == 'x':
+                    time.sleep(0.5)
+                else:
+                    driver.execute_script("productOrder.check_GSPASGC('chain', '"+colum_4+"'); ")
+
+                if colum_5 == 'x':
+                    time.sleep(0.5)
+                else:
+                    driver.execute_script(" productOrder.check_GSPASGC('thickness', '"+colum_5+"'); ")
+
+                if colum_6 == 'x':
+                    time.sleep(0.5)
+                else:
+                    driver.execute_script("  productOrder.opt_use_yn('"+colum_6+"', '');  ")
+
+
+                driver.execute_script('window.scrollTo(0, 400);')
+                # total_price = wait.until( EC.visibility_of_element_located((By.ID, "PRICE_DIS2")) )
+                # tprice = total_price.text
+                time.sleep(1)
+                try:
+                     driver.find_element(By.ID, 'direct_order_btn').click()
+                     try:
+                         # alert가 뜰 때까지 기다리기 (최대 3초)
+                         alert = WebDriverWait(driver, 3).until(EC.alert_is_present())
+                         alert.accept()
+                         wait.until(EC.element_to_be_clickable((By.ID, 'direct_order_btn'))).click()
+                     except TimeoutException:
+                         time.sleep(1)
+
+                except Exception as e:
+                    print("예외 발생:", e)
+                # time.sleep(5)
+                # driver.find_element(By.ID, 'direct_order_btn').click()
+                time.sleep(2)
+                print(i, "번째 : ", colum_1, "|", colum_2, "|", colum_3, "|", colum_4, "|", colum_5, "|", colum_6)  # , "pot_tmp_cod : ", imsiordernum
                 # al = Alert(driver)
                 # al.accept()
                 # time.sleep(0.5)
