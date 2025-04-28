@@ -2116,18 +2116,18 @@ def uploadfile_ordernum_creating(df_item_config, df_item):
                 time.sleep(1)
                 driver.execute_script("$('#chk_notice_confirm').click();")  # 확인했습니다.
                 time.sleep(1)
-                # try:
-                #      driver.find_element(By.ID, 'direct_order_btn').click()
-                #      try:
-                #          # alert가 뜰 때까지 기다리기 (최대 3초)
-                #          alert = WebDriverWait(driver, 3).until(EC.alert_is_present())
-                #          alert.accept()
-                #          wait.until(EC.element_to_be_clickable((By.ID, 'direct_order_btn'))).click()
-                #      except TimeoutException:
-                #          time.sleep(1)
-                #
-                # except Exception as e:
-                #     print("예외 발생:", e)
+                try:
+                     driver.find_element(By.ID, 'direct_order_btn').click()
+                     try:
+                         # alert가 뜰 때까지 기다리기 (최대 3초)
+                         alert = WebDriverWait(driver, 3).until(EC.alert_is_present())
+                         alert.accept()
+                         wait.until(EC.element_to_be_clickable((By.ID, 'direct_order_btn'))).click()
+                     except TimeoutException:
+                         time.sleep(1)
+
+                except Exception as e:
+                    print("예외 발생:", e)
                 # time.sleep(5)
                 # driver.find_element(By.ID, 'direct_order_btn').click()
                 time.sleep(1)
