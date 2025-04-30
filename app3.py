@@ -2398,6 +2398,10 @@ def uploadfile_ordernum_creating(df_item_config, df_item):
                         driver.execute_script("productOrder.opt_use_yn('PRT_WHT2', '     ');")
                         wait.until(EC.invisibility_of_element_located((By.ID, 'overlay')))
                         time.sleep(0.5)
+                    elif colum_1 == '고투명 PET 리무버블':
+                        driver.execute_script("productOrder.opt_use_yn('PRT_WHT2', '     ');")
+                        wait.until(EC.invisibility_of_element_located((By.ID, 'overlay')))
+                        time.sleep(0.5)
                     else:
                         driver.execute_script("productOrder.opt_use_yn('PRT_WHT', '     ');")
                         wait.until(EC.invisibility_of_element_located((By.ID, 'overlay')))
