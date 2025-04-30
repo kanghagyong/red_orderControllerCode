@@ -2304,6 +2304,8 @@ def uploadfile_ordernum_creating(df_item_config, df_item):
                         driver.find_element(By.ID, 'CUT_WDT').send_keys(Keys.BACK_SPACE)
                         time.sleep(0.5)
                         driver.find_element(By.ID, 'CUT_WDT').send_keys(wid_size)
+                    else:
+                        time.sleep(0.5)
 
                     CUT_HGH_text = wait.until( EC.visibility_of_element_located((By.ID, "CUT_HGH")) )
                     if CUT_HGH_text.get_attribute('value') != hei_size:
@@ -2315,7 +2317,8 @@ def uploadfile_ordernum_creating(df_item_config, df_item):
                         driver.find_element(By.ID, 'CUT_HGH').send_keys(Keys.BACK_SPACE)
                         time.sleep(0.5)
                         driver.find_element(By.ID, 'CUT_HGH').send_keys(hei_size)
-
+                    else:
+                        time.sleep(0.5)
                 else:
                     size_text = wait.until(EC.visibility_of_element_located((By.ID, "sizeSelectBoxItText")))
                     if size_text.text != colum_4:
