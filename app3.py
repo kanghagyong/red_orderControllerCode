@@ -686,7 +686,7 @@ def login_check_proc(userid, userpw, itemUrl, driver, itemCode):
 def uploadfile_ordernum_creating(df_item_config, df_item):
     itemList_card = ['BCSPDFT', 'BNSTDFT', 'PRCAFIL', 'BNSTMAS']
     itemList_hk = ['GSKYHOT']
-    itemList_sticker = ['STCUXXX', 'STTHELP', 'STTHSQU', 'STTHUSR']
+    itemList_sticker = ['STTHELP', 'STTHSQU', 'STTHUSR']
     itemList_sticker2 = ['STPADIY']
     itemList_stationery = ['GSSBMTL', 'GSSBACM', 'GSSBSTP']
     itemList_tee = ['CLTMMTS', 'CLTMHDS', 'CLTMSHS']
@@ -699,7 +699,7 @@ def uploadfile_ordernum_creating(df_item_config, df_item):
     itemList_kring = ['GSSRCUT', 'GSSRPRT']
     itemList_pendunte = ['GSPASGC']
     itemList_PRCAXPO = ['PRCAXPO']
-    itemList_LFXXXXX = ['LFXXXXX', 'PRPOXXX', 'PRLFXXX', 'STTHCIC']
+    itemList_LFXXXXX = ['LFXXXXX', 'PRPOXXX', 'PRLFXXX', 'STTHCIC', 'STCUXXX']
     # 현재 화면 크기 가져오기
     screen_width, screen_height = pyautogui.size()
 
@@ -2288,13 +2288,40 @@ def uploadfile_ordernum_creating(df_item_config, df_item):
                 # driver.execute_script("arguments[0].style.display = 'block';", driver.find_element(By.ID, "paper_tr"))
                 driver.execute_script('window.scrollTo(0, 200);')
                 time.sleep(0.5)
+                if itemCode == 'STCUXXX':
+                    sizesplit = colum_4.split("*")
+                    wid_size = sizesplit[0]
+                    hei_size = sizesplit[1]
+                    CUT_WDT_text = wait.until( EC.visibility_of_element_located((By.ID, "CUT_WDT")) )
+                    if CUT_WDT_text.get_attribute('value') != wid_size:
+                        # 상품 페이지 사이즈 직접입력 사이즈 입력
+                        driver.find_element(By.ID, 'CUT_WDT').click()
+                        time.sleep(0.5)
+                        driver.find_element(By.ID, 'CUT_WDT').send_keys(Keys.BACK_SPACE)
+                        driver.find_element(By.ID, 'CUT_WDT').send_keys(Keys.BACK_SPACE)
+                        driver.find_element(By.ID, 'CUT_WDT').send_keys(Keys.BACK_SPACE)
+                        driver.find_element(By.ID, 'CUT_WDT').send_keys(Keys.BACK_SPACE)
+                        time.sleep(0.5)
+                        driver.find_element(By.ID, 'CUT_WDT').send_keys(wid_size)
 
-                size_text = wait.until(EC.visibility_of_element_located((By.ID, "sizeSelectBoxItText")))
-                if size_text.text != colum_3:
-                    # 사이즈 직접입력 선택 sizeSelectBoxItContainer
-                    driver.find_element(By.ID, 'sizeSelectBoxIt').click()
-                    wait.until(EC.invisibility_of_element_located((By.ID, 'overlay')))
-                    driver.find_element(By.LINK_TEXT, colum_3).click()
+                    CUT_HGH_text = wait.until( EC.visibility_of_element_located((By.ID, "CUT_HGH")) )
+                    if CUT_HGH_text.get_attribute('value') != hei_size:
+                        driver.find_element(By.ID, 'CUT_HGH').click()
+                        time.sleep(0.5)
+                        driver.find_element(By.ID, 'CUT_HGH').send_keys(Keys.BACK_SPACE)
+                        driver.find_element(By.ID, 'CUT_HGH').send_keys(Keys.BACK_SPACE)
+                        driver.find_element(By.ID, 'CUT_HGH').send_keys(Keys.BACK_SPACE)
+                        driver.find_element(By.ID, 'CUT_HGH').send_keys(Keys.BACK_SPACE)
+                        time.sleep(0.5)
+                        driver.find_element(By.ID, 'CUT_HGH').send_keys(hei_size)
+
+                else:
+                    size_text = wait.until(EC.visibility_of_element_located((By.ID, "sizeSelectBoxItText")))
+                    if size_text.text != colum_4:
+                        # 사이즈 직접입력 선택 sizeSelectBoxItContainer
+                        driver.find_element(By.ID, 'sizeSelectBoxIt').click()
+                        wait.until(EC.invisibility_of_element_located((By.ID, 'overlay')))
+                        driver.find_element(By.LINK_TEXT, colum_4).click()
 
                 wait.until(EC.invisibility_of_element_located((By.ID, 'overlay')))
                 paper_text = wait.until(EC.visibility_of_element_located((By.ID, "paperSelectBoxItText")))
@@ -2314,10 +2341,10 @@ def uploadfile_ordernum_creating(df_item_config, df_item):
 
                 wait.until(EC.invisibility_of_element_located((By.ID, 'overlay')))
                 docu_text = wait.until( EC.visibility_of_element_located((By.ID, "soduSelectBoxItText")))
-                if docu_text.text != colum_4:
+                if docu_text.text != colum_3:
                     driver.find_element(By.ID, 'soduSelectBoxIt').click()
                     wait.until(EC.invisibility_of_element_located((By.ID, 'overlay')))
-                    driver.find_element(By.LINK_TEXT, colum_4).click()
+                    driver.find_element(By.LINK_TEXT, colum_3).click()
 
                 wait.until(EC.invisibility_of_element_located((By.ID, 'overlay')))
                 driver.execute_script("productOrder.check_PRN_CNT();")
