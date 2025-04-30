@@ -2285,6 +2285,7 @@ def uploadfile_ordernum_creating(df_item_config, df_item):
                 colum_9 = df_item.iloc[i, 9] #재단
                 colum_10 = df_item.iloc[i, 10] #화이트인쇄
 
+                paper_coting_check = ['금 라벨지', '은 라벨지', '동 라벨지']
                 # driver.execute_script("arguments[0].style.display = 'block';", driver.find_element(By.ID, "paper_tr"))
                 driver.execute_script('window.scrollTo(0, 200);')
                 time.sleep(0.5)
@@ -2371,8 +2372,11 @@ def uploadfile_ordernum_creating(df_item_config, df_item):
                     driver.execute_script("productOrder.opt_use_yn('COT_DFT', 'SID_S');")
                     wait.until(EC.invisibility_of_element_located((By.ID, 'overlay')))
                 elif colum_6 == '무광':
-                    driver.execute_script("productOrder.opt_use_yn('COT_DFT', 'SID_S');")
-                    wait.until(EC.invisibility_of_element_located((By.ID, 'overlay')))
+                    if colum_1 in paper_coting_check:
+                        time.sleep(0.5)
+                    else:
+                        driver.execute_script("productOrder.opt_use_yn('COT_DFT', 'SID_S');")
+                        wait.until(EC.invisibility_of_element_located((By.ID, 'overlay')))
                 elif colum_6 == '유광단면':
                     driver.execute_script("productOrder.opt_use_yn('COT_DFT', 'SID_S');")
                     wait.until(EC.invisibility_of_element_located((By.ID, 'overlay')))
@@ -2380,11 +2384,16 @@ def uploadfile_ordernum_creating(df_item_config, df_item):
                     driver.execute_script("productOrder.opt_select('COT_DFT','GL');")
                     wait.until(EC.invisibility_of_element_located((By.ID, 'overlay')))
                 elif colum_6 == '유광':
-                    driver.execute_script("productOrder.opt_use_yn('COT_DFT', 'SID_S');")
-                    wait.until(EC.invisibility_of_element_located((By.ID, 'overlay')))
-                    time.sleep(0.5)
-                    driver.execute_script("productOrder.opt_select('COT_DFT','GL');")
-                    wait.until(EC.invisibility_of_element_located((By.ID, 'overlay')))
+                    if colum_1 in paper_coting_check:
+                        time.sleep(0.5)
+                        driver.execute_script("productOrder.opt_select('COT_DFT','GL');")
+                        wait.until(EC.invisibility_of_element_located((By.ID, 'overlay')))
+                    else:
+                        driver.execute_script("productOrder.opt_use_yn('COT_DFT', 'SID_S');")
+                        wait.until(EC.invisibility_of_element_located((By.ID, 'overlay')))
+                        time.sleep(0.5)
+                        driver.execute_script("productOrder.opt_select('COT_DFT','GL');")
+                        wait.until(EC.invisibility_of_element_located((By.ID, 'overlay')))
                 elif colum_6 == '무광양면':
                     driver.execute_script("productOrder.opt_use_yn('COT_DFT', 'SID_S');")
                     wait.until(EC.invisibility_of_element_located((By.ID, 'overlay')))
