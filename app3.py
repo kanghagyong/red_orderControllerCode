@@ -2390,9 +2390,19 @@ def uploadfile_ordernum_creating(df_item_config, df_item):
                 if colum_10 == 'x':
                     time.sleep(0.5)
                 else:
-                    driver.execute_script("productOrder.opt_use_yn('PRT_WHT', '     ');")
-                    wait.until(EC.invisibility_of_element_located((By.ID, 'overlay')))
-                    time.sleep(0.5)
+                    if colum_1 == '금광 PET':
+                        driver.execute_script("productOrder.opt_use_yn('PRT_WHT2', '     ');")
+                        wait.until(EC.invisibility_of_element_located((By.ID, 'overlay')))
+                        time.sleep(0.5)
+                    elif colum_1 == '은광 PET':
+                        driver.execute_script("productOrder.opt_use_yn('PRT_WHT2', '     ');")
+                        wait.until(EC.invisibility_of_element_located((By.ID, 'overlay')))
+                        time.sleep(0.5)
+                    else:
+                        driver.execute_script("productOrder.opt_use_yn('PRT_WHT', '     ');")
+                        wait.until(EC.invisibility_of_element_located((By.ID, 'overlay')))
+                        time.sleep(0.5)
+
                 time.sleep(0.5)
                 # if colum_5 == 'x':
                 #     time.sleep(0.5)
@@ -2418,7 +2428,7 @@ def uploadfile_ordernum_creating(df_item_config, df_item):
                 # driver.execute_script("productOrder.order_validate('pot_create');")  # 확인했습니다.
                 # time.sleep(1)
                 try:
-                    # driver.execute_script("productOrder.order_validate('pot_create');")
+                    driver.execute_script("productOrder.order_validate('pot_create');")
                     time.sleep(1)
                     # driver.find_element(By.ID, 'direct_order_btn').click()
                     # try:
