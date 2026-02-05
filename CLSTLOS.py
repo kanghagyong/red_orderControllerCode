@@ -66,8 +66,8 @@ def index():
     return render_template_string(
         html,
         files1=file_links1,
-        colors=['화이트', '그레이', '버건디', '라이트블루', '로얄블루', '네이비', '블랙'],
-        sizes=['1', '2', '3', '4', '5']
+        colors=['화이트', '블랙', '애쉬', '네이비'],
+        sizes=['2', '3', '4', '5', '6']
     )
 
 
@@ -126,8 +126,8 @@ def uploadfile_ordernum_creating(color, size):
     driver = create_driver()
 
     # 상품코드 가져오기
-    itemUrl = 'https://www.redprinting.co.kr/ko/product/item/CL/CLDFALP'
-    itemCode = 'CLDFALP'
+    itemUrl = 'https://www.redprinting.co.kr/ko/product/item/CL/CLSTLOS'
+    itemCode = 'CLSTLOS'
     userid = 'red_openmarket' #red_openmarket, #redprinting
     userpw = 'guest1004!' #red4874# , #redprinting#1234
 
@@ -136,7 +136,7 @@ def uploadfile_ordernum_creating(color, size):
         driver.find_element(By.XPATH, '//*[@id="widget"]/div/article[1]/div[3]/button[2]').click()
         time.sleep(0.5)
         # colorList = ['화이트', '블랙', '애쉬', '네이비']
-        sizeList = ['1', '2', '3', '4', '5']
+        sizeList = ['2', '3', '4', '5', '6']
         select_color(driver, color)
         # select_size(driver, size)
 

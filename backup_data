@@ -1,0 +1,119 @@
+                paper_text = WebDriverWait(driver, 5).until( EC.visibility_of_element_located((By.ID, "paperSelectBoxItText")) )
+                if paper_text.text != paper:
+                    # 상품 페이지 용지선택
+                    WebDriverWait(driver, 10).until( EC.invisibility_of_element_located((By.ID, 'overlay')) )
+                    # paperSelectBoxItContainer
+                    driver.find_element(By.ID, 'paperSelectBoxIt').click()
+                    WebDriverWait(driver, 10).until( EC.invisibility_of_element_located((By.ID, 'overlay')) )
+                    driver.find_element(By.LINK_TEXT, paper).click()
+
+                WebDriverWait(driver, 10).until( EC.invisibility_of_element_located((By.ID, 'overlay')) )
+                if wgtcod != "":
+                    # 상품 페이지 G수 선택
+                    wgt_text = WebDriverWait(driver, 5).until( EC.visibility_of_element_located((By.ID, "paper_sub_selectSelectBoxItText")) )
+                    if wgt_text.text != str(wgtcod):
+                        #paper_sub_selectSelectBoxItContainer
+                        driver.find_element(By.ID, 'paper_sub_selectSelectBoxIt').click()
+                        WebDriverWait(driver, 10).until( EC.invisibility_of_element_located((By.ID, 'overlay')) )
+                        driver.find_element(By.LINK_TEXT, str(wgtcod)).click()
+
+                WebDriverWait(driver, 10).until( EC.invisibility_of_element_located((By.ID, 'overlay')) )
+                if dosu != "":
+                    # 상품 페이지 인쇄도수 선택
+                    docu_text = WebDriverWait(driver, 5).until( EC.visibility_of_element_located((By.ID, "soduSelectBoxItText")) )
+                    if docu_text.text != dosu:
+                        #soduSelectBoxItContainer
+                        driver.find_element(By.ID, 'soduSelectBoxIt').click()
+                        WebDriverWait(driver, 10).until( EC.invisibility_of_element_located((By.ID, 'overlay')) )
+                        driver.find_element(By.LINK_TEXT, dosu).click()
+
+                WebDriverWait(driver, 10).until( EC.invisibility_of_element_located((By.ID, 'overlay')) )
+                size_text = WebDriverWait(driver, 5).until( EC.visibility_of_element_located((By.ID, "sizeSelectBoxItText")) )
+                if size_text.text != size:
+                    # 사이즈 직접입력 선택 sizeSelectBoxItContainer
+                    driver.find_element(By.ID, 'sizeSelectBoxIt').click()
+                    WebDriverWait(driver, 10).until( EC.invisibility_of_element_located((By.ID, 'overlay')) )
+                    driver.find_element(By.LINK_TEXT, size).click()
+
+
+                WebDriverWait(driver, 10).until( EC.invisibility_of_element_located((By.ID, 'overlay')) )
+                driver.find_element(By.XPATH, '//*[@id="WRK_HGH"]').click()
+                WebDriverWait(driver, 10).until( EC.invisibility_of_element_located((By.ID, 'overlay')) )
+                driver.execute_script("productOrder.check_PRN_CNT();")
+                number1_text = WebDriverWait(driver, 5).until( EC.visibility_of_element_located((By.ID, "number1")) )
+                if number1_text.get_attribute('value') != str(amount):
+                    time.sleep(0.5)
+                    driver.find_element(By.ID, 'number1').click()
+                    driver.find_element(By.ID, 'number1').send_keys(Keys.DELETE)
+                    driver.find_element(By.ID, 'number1').send_keys(Keys.DELETE)
+                    driver.find_element(By.ID, 'number1').send_keys(Keys.DELETE)
+                    driver.find_element(By.ID, 'number1').send_keys(Keys.DELETE)
+                    driver.find_element(By.ID, 'number1').send_keys(Keys.BACK_SPACE)
+                    driver.find_element(By.ID, 'number1').send_keys(Keys.BACK_SPACE)
+                    driver.find_element(By.ID, 'number1').send_keys(Keys.BACK_SPACE)
+                    driver.find_element(By.ID, 'number1').send_keys(Keys.BACK_SPACE)
+                    time.sleep(0.5)
+                    driver.find_element(By.ID, 'number1').send_keys(str(amount))
+
+                WebDriverWait(driver, 10).until( EC.invisibility_of_element_located((By.ID, 'overlay')) )
+                apcs_nowstatus = driver.find_element(By.ID, 'opt_string').get_attribute('value')
+                if apcs1 == "무광":
+                    if 'COT_DFT' in apcs_nowstatus:
+                        time.sleep(0.2)
+                    else:
+                        # 상품 페이지 코팅 선택
+                        driver.execute_script("productOrder.opt_use_yn('COT_DFT', 'SID_S');")
+                    WebDriverWait(driver, 10).until( EC.invisibility_of_element_located((By.ID, 'overlay')) )
+                    driver.execute_script("productOrder.opt_select('COT_DFT','MA');")# 상품 페이지 무광코팅 선택
+                elif apcs1 == "유광":
+                    if 'COT_DFT' in apcs_nowstatus:
+                        time.sleep(0.2)
+                    else:
+                        # 상품 페이지 코팅 선택
+                        driver.execute_script("productOrder.opt_use_yn('COT_DFT', 'SID_S');")
+                    WebDriverWait(driver, 10).until( EC.invisibility_of_element_located((By.ID, 'overlay')) )
+                    driver.execute_script("productOrder.opt_select('COT_DFT','GL');")# 상품 페이지 유광코팅 선택
+                else:
+                    if 'COT_DFT' in apcs_nowstatus:
+                        driver.execute_script("productOrder.opt_use_yn('COT_DFT', 'SID_S');") #코팅 후가공 다시 선택 시 선택해제됨.
+                    else:
+                        time.sleep(0.2)
+                WebDriverWait(driver, 10).until( EC.invisibility_of_element_located((By.ID, 'overlay')) )
+
+                driver.execute_script("productOrder.order_type_change('editor');")  # 코이에디터 선택
+                time.sleep(2)
+
+                if apcs4 == "묶음재단":
+                    driver.execute_script("productOrder.opt_checked('CUT_DFT', 'DFXXX');")  # 상품 페이지 묶음재단 선택
+                elif apcs4 == "개별재단":
+                    driver.execute_script("productOrder.opt_checked('CUT_DFT', 'DFITM');")  # 상품 페이지 개별재단 선택
+                else:
+                    time.sleep(0.2)
+                WebDriverWait(driver, 5).until( EC.invisibility_of_element_located((By.ID, 'overlay')) )
+                driver.find_element(By.XPATH, '//*[@id="WRK_HGH"]').click()
+                total_price = WebDriverWait(driver, 5).until( EC.visibility_of_element_located((By.ID, "TOTAL_PRICE")) )
+
+                driver.execute_script("$('#chk_notice_confirm').click();")  # 확인했습니다.
+                time.sleep(2)
+
+                total_price = WebDriverWait(driver, 5).until( EC.visibility_of_element_located((By.ID, "TOTAL_PRICE")) )
+                tprice = total_price.text
+                # total_price = driver.find_element(By.ID, 'TOTAL_PRICE').text
+                # df_item.loc[i, 'Price'] = tprice
+                time.sleep(0.5)
+                driver.find_element(By.ID, 'direct_order_btn').click()
+                time.sleep(3)
+                al = Alert(driver)
+                al.accept()
+                time.sleep(0.5)
+                imsiordernum = driver.find_element(By.ID, 'pot_tmp_cod').get_attribute('value')
+                # newFileData = newFileData+"\t"+imsiordernum+"\t"+tprice+"\n"
+                # if (i+1) % 5 == 0:
+                #     nowtime = str(now.year)+''+str(now.month)+''+str(now.day)+'_'+str(now.hour)+''+str(now.minute)
+                #     new_filename = REDATA_FOLDER+'/'+userid+'_'+itemCode+"_"+str(i+1)+'_'+nowtime+'.txt'
+                #     with open(new_filename, 'w', encoding='ansi') as file:
+                #         file.write(newFileData)
+                # df_item.loc[i, 'OrderCode'] = imsiordernum  # 주문관리코드생성후추가
+                print(i, "번째 TOTAL_PRICE : ", tprice, "pot_tmp_cod : ", imsiordernum)
+                driver.execute_script('window.scrollTo(0, 100);')
+                time.sleep(2)
