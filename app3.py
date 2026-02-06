@@ -32,7 +32,7 @@ def index():
     xlsx_files1 = [f for f in os.listdir(REDATA_FOLDER) if f.endswith('.txt')]
     file_links1 = ''.join(f'<li><a href="/download2/{f}">{f}</a></li>' for f in xlsx_files1)
     html = '''
-        <div style="width:30%;float:left;">
+        <div style="width:100%;float:left;">
             <h1>코드생성 파일업</h1>
 
             <form action="/upload2" method="post">
@@ -41,13 +41,13 @@ def index():
                 {% for c in colors %}
                     <label>
                         <input type="radio" name="color" value="{{ c }}" style="width:20px;height:20px;"> {{ c }}
-                    </label><br>
+                    </label>
                 {% endfor %}
 
                 <h3>사이즈 선택</h3>
                 <span>2:S, 3:M, 4:L, 5:XL, 6:XXL</span>
-                <select name="size" style="width:100px;height:50px;">
-                    {% for s in sizes %}
+                <select name="type" style="width:100px;height:50px;">
+                    {% for s in types %}
                         <option value="{{ s }}">{{ s }}</option>
                     {% endfor %}
                 </select>
@@ -66,20 +66,20 @@ def index():
     return render_template_string(
         html,
         files1=file_links1,
-        colors=['스포츠그레이', '블랙', '네이비', '마룬', '포레스트그린'],
-        sizes=['1', '2', '3', '4', '5']
+        colors=['화이트', '모쿠그레이', '블랙', '라이트블루', '라이트핑크'],
+        types=['adult', 'child']
     )
 
 
 @app3.route('/upload2', methods=['POST'])
 def upload2_file():
     selected_color = request.form.get('color')   # radio
-    selected_size = request.form.get('size')     # select
+    selected_type = request.form.get('type')     # select
 
     print("선택 색상:", selected_color)
-    print("선택 사이즈:", selected_size)
+    print("선택 사이즈:", selected_type)
 
-    uploadfile_ordernum_creating(selected_color, selected_size)
+    uploadfile_ordernum_creating(selected_color, selected_type)
     time.sleep(3)
 
     return '파일이 업로드되었습니다!<br><a href="/">목록</a>'
@@ -121,30 +121,36 @@ def create_driver():
     return driver
 
 # 일반적인 상품 주문관리 코드 생성 로직
-def uploadfile_ordernum_creating(color, size):
+def uploadfile_ordernum_creating(color, type):
 
     driver = create_driver()
 
     # 상품코드 가져오기
-    itemUrl = 'https://www.redprinting.co.kr/ko/product/item/CL/CLDFMHS/detail/QTB'
-    itemCode = 'CLDFMHS'
+    itemUrl = 'https://www.redprinting.co.kr/ko/product/item/CL/CLTMSHS'
+    itemCode = 'CLTMSHS'
     userid = 'red_openmarket' #red_openmarket, #redprinting
     userpw = 'guest1004!' #red4874# , #redprinting#1234
 
     login_check_proc(userid, userpw, itemUrl, driver, itemCode)
     try:
-        # driver.find_element(By.XPATH, '//*[@id="widget"]/div/article[1]/div[3]/button[2]').click()
-        # time.sleep(0.5)
+        driver.find_element(By.XPATH, '//*[@id="widget"]/div/article[4]/div[2]/div/div/button').click()
+        time.sleep(0.5)
         # colorList = ['스포츠그레이', '블랙', '네이비', '마룬', '포레스트그린']
         sizeList = ['1', '2', '3', '4', '5']
+        countList = [10, 50, 100, 200, 500]
         select_color(driver, color)
         # select_size(driver, size)
+        select_type(driver, type)
+
+        if type == 'child':
+            sizeList = ['1', '2', '3', '4']
 
         printArea = [
-            '좌측가슴,x'
-            'x,뒷면'
-            '좌측가슴,x'
-            '좌측가슴,뒷면'
+            '좌측가슴,x,x'
+            ,'x,x,뒷면'
+            ,'좌측가슴,x,x'
+            ,'x,앞면,x'
+            ,'x,x,뒷면'
         ]
 
 
@@ -156,17 +162,22 @@ def uploadfile_ordernum_creating(color, size):
         for size in sizeList:
             select_size(driver, size)
 
-            for pojang in pojanglist:
-                select_pojang(driver, pojang)
+            # for pojang in pojanglist:
+            #     select_pojang(driver, pojang)
+
+            for cnt in countList:
+                select_count(driver, cnt)
+
                 i=0
                 for area in printArea:
                     i = i + 1
                     select_print_area(driver, area)
                     #print(area)
                     time.sleep(1.5)  # 가격 DOM 갱신 대기
-                    if i == 4 :
+                    if i == 6 :
                         print("인쇄영역 초기화")
                     else:
+                        print("인쇄영역 변경.")
                         try:
                             driver.execute_script("fnPreOrderPot('pot_create', event);")
                             time.sleep(6)
@@ -207,17 +218,32 @@ def select_color(driver, color):
 
 
 def select_size(driver, size):
-    driver.find_element(By.XPATH, '//*[@id="widget"]/div/article[3]/div[2]/button['+size+']').click()
+    driver.find_element(By.XPATH, '//*[@id="widget"]/div/article[3]/div[3]/button['+size+']').click()
     time.sleep(0.5)
 
 def select_pojang(driver, po):
     driver.find_element(By.ID, po).click()
     time.sleep(0.5)
 
+def select_type(driver, type):
+    driver.find_element(By.ID, type).click()
+    time.sleep(1)
+
+def select_count(driver, cnt):
+    qty_input = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.ID, "PRN_CNT"))
+    )
+    driver.execute_script("""
+            arguments[0].value = arguments[1];
+            arguments[0].dispatchEvent(new Event('input', {bubbles:true}));
+            arguments[0].dispatchEvent(new Event('change', {bubbles:true}));
+        """, qty_input, cnt)
+
 def select_print_area(driver, area_code):
     position_map = {
         0: '좌측가슴',
-        1: '뒷면'
+        1: '앞면',
+        2: '뒷면'
     }
 
     container = WebDriverWait(driver, 10).until(

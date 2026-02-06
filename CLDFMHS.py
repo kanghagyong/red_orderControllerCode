@@ -142,9 +142,9 @@ def uploadfile_ordernum_creating(color, size):
 
         printArea = [
             '좌측가슴,x'
-            'x,뒷면'
-            '좌측가슴,x'
-            '좌측가슴,뒷면'
+            ,'x,뒷면'
+            ,'좌측가슴,x'
+            ,'좌측가슴,뒷면'
         ]
 
 
